@@ -1,4 +1,4 @@
-use clap::{Command, Arg};
+use clap::{Arg, Command};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -6,7 +6,7 @@ use std::time::{Duration, Instant};
 async fn main() {
     let matches = Command::new("Pomodoro Timer")
         .version("1.0")
-        .author("Your Name")
+        .author("Peter Szilvasi")
         .about("A simple Pomodoro timer CLI app.")
         .arg(
             Arg::new("work")
@@ -26,8 +26,17 @@ async fn main() {
         )
         .get_matches();
 
-    let work_duration: u64 = matches.get_one::<String>("work").unwrap().parse().expect("unable to parse the `work` argument");
-    let break_duration: u64 = matches.get_one::<String>("break").unwrap().parse().expect("unable to parse the `break` argument");
+    let work_duration: u64 = matches
+        .get_one::<String>("work")
+        .unwrap()
+        .parse()
+        .expect("unable to parse the `work` argument");
+
+    let break_duration: u64 = matches
+        .get_one::<String>("break")
+        .unwrap()
+        .parse()
+        .expect("unable to parse the `break` argument");
 
     loop {
         println!("Work for {} minutes!", work_duration);

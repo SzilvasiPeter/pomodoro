@@ -1,4 +1,5 @@
 use clap::{Arg, Command};
+use std::io::{self, Write};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -38,21 +39,38 @@ async fn main() {
         .parse()
         .expect("unable to parse the `break` argument");
 
+    let work_duration = Duration::from_secs(work_duration);
+    let break_duration = Duration::from_secs(break_duration);
+
     loop {
-        println!("Work for {} minutes!", work_duration);
+        println!("Start work session!");
         start_timer(work_duration * 1).await;
-        println!("Take a {}-minute break!", break_duration);
+        println!("Take a break!");
         start_timer(break_duration * 1).await;
     }
 }
 
-async fn start_timer(duration: u64) {
-    let start_time = Instant::now();
-    let target_time = Duration::from_secs(duration);
+async fn start_timer(target_time: Duration) {
+    println!("Target time: {:?}", target_time);
+    println!("Press Enter to continue...");
+    io::stdout().flush().unwrap();
 
+    let mut buffer = String::new();
+    if io::stdin().read_line(&mut buffer).is_ok() {
+        count_down(target_time);
+    } else {
+        eprintln!("Error reading from stdin.");
+    }
+
+    // TODO: Add ticking sound at the end of the timer
+}
+
+fn count_down(target_time: Duration) {
+    let start_time = Instant::now();
     while start_time.elapsed() < target_time {
-        print!("\rTime left: {:?} ", target_time - start_time.elapsed());
+        print!("\rStart time elapsed: {:?}", start_time.elapsed());
+        io::stdout().flush().unwrap();
         sleep(Duration::from_secs(1));
     }
-    println!("\rTime left: 00:00");
+    println!();
 }

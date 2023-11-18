@@ -1,4 +1,6 @@
 use clap::{Arg, Command};
+use notify_rust::Notification;
+
 use std::io::{self, Write};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
@@ -51,7 +53,7 @@ async fn main() {
 }
 
 async fn start_timer(target_time: Duration) {
-    println!("Target time: {:?}", target_time);
+    println!("Target time: {}", format_duration(target_time));
     println!("Press Enter to continue...");
     io::stdout().flush().unwrap();
 
@@ -62,15 +64,32 @@ async fn start_timer(target_time: Duration) {
         eprintln!("Error reading from stdin.");
     }
 
-    // TODO: Add ticking sound at the end of the timer
+    Notification::new()
+        .summary("Timer is finished.")
+        .sound_name("message-new-instant")
+        .show()
+        .unwrap();
 }
 
 fn count_down(target_time: Duration) {
     let start_time = Instant::now();
     while start_time.elapsed() < target_time {
-        print!("\rStart time elapsed: {:?}", start_time.elapsed());
+        print!(
+            "\rStart time elapsed: {}",
+            format_duration(start_time.elapsed())
+        );
         io::stdout().flush().unwrap();
         sleep(Duration::from_secs(1));
     }
     println!();
+}
+
+fn format_duration(duration: Duration) -> String {
+    let seconds = duration.as_secs();
+    format!(
+        "{:02}:{:02}:{:02}",
+        seconds / 3600,
+        (seconds % 3600) / 60,
+        seconds % 60
+    )
 }

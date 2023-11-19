@@ -94,3 +94,32 @@ fn format_duration(duration: Duration) -> String {
         seconds % 60
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_duration_zero_seconds() {
+        let duration = Duration::from_secs(0);
+        assert_eq!(format_duration(duration), "00:00:00");
+    }
+
+    #[test]
+    fn test_format_duration_less_than_one_hour() {
+        let duration = Duration::from_secs(1500);
+        assert_eq!(format_duration(duration), "00:25:00");
+    }
+
+    #[test]
+    fn test_format_duration_one_hour() {
+        let duration = Duration::from_secs(3600);
+        assert_eq!(format_duration(duration), "01:00:00");
+    }
+
+    #[test]
+    fn test_format_duration_multiple_hours() {
+        let duration = Duration::from_secs(98765);
+        assert_eq!(format_duration(duration), "27:26:05");
+    }
+}

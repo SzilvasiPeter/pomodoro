@@ -33,42 +33,41 @@ async fn main() {
         .get_one::<String>("work")
         .unwrap()
         .parse()
-        .expect("unable to parse the `work` argument");
+        .expect("Unable to parse the `work` argument");
 
     let break_duration: u64 = matches
         .get_one::<String>("break")
         .unwrap()
         .parse()
-        .expect("unable to parse the `break` argument");
+        .expect("Unable to parse the `break` argument");
 
-    let work_duration = Duration::from_secs(work_duration);
-    let break_duration = Duration::from_secs(break_duration);
+    let work_duration = Duration::from_secs(work_duration) * 60;
+    let break_duration = Duration::from_secs(break_duration) * 60;
 
     loop {
         println!("Start work session!");
-        start_timer(work_duration * 1).await;
+        start_timer(work_duration).await;
         println!("Take a break!");
-        start_timer(break_duration * 1).await;
+        start_timer(break_duration).await;
     }
 }
 
 async fn start_timer(target_time: Duration) {
     println!("Target time: {}", format_duration(target_time));
-    println!("Press Enter to continue...");
-    io::stdout().flush().unwrap();
 
+    println!("Press Enter to continue...");
     let mut buffer = String::new();
-    if io::stdin().read_line(&mut buffer).is_ok() {
-        count_down(target_time);
-    } else {
-        eprintln!("Error reading from stdin.");
-    }
+    io::stdin()
+        .read_line(&mut buffer)
+        .expect("Error reading from stdin.");
+
+    count_down(target_time);
 
     Notification::new()
         .summary("Timer is finished.")
         .sound_name("message-new-instant")
         .show()
-        .unwrap();
+        .expect("Error during sending the notification.");
 }
 
 fn count_down(target_time: Duration) {
@@ -78,7 +77,9 @@ fn count_down(target_time: Duration) {
             "\rStart time elapsed: {}",
             format_duration(start_time.elapsed())
         );
-        io::stdout().flush().unwrap();
+        io::stdout()
+            .flush()
+            .expect("Error flushing the output stream.");
         sleep(Duration::from_secs(1));
     }
     println!();

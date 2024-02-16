@@ -23,8 +23,8 @@ jobs:
     name: release ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         target: [x86_64-unknown-linux-musl, x86_64-apple-darwin, x86_64-pc-windows-gnu]
     steps:
       - uses: actions/checkout@master

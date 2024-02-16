@@ -10,7 +10,6 @@ license = "MIT"
 chrono = "0.4.31"
 clap = "4.4.7"
 notify-rust = "4.10.0"
-tokio = { version = "1.33.0", features = ["full"] }
 
 [dev-dependencies]
 

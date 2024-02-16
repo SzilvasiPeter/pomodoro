@@ -1,12 +1,11 @@
 use chrono::{Duration, NaiveTime};
 use clap::{Arg, Command};
 use notify_rust::Notification;
-use tokio::time::sleep;
 
 use std::io::{self, Write};
+use std::thread::sleep;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let matches = Command::new("Pomodoro Timer")
         .version("1.0")
         .author("Peter Szilvasi")
@@ -16,7 +15,7 @@ async fn main() {
                 .short('w')
                 .long("work")
                 .value_name("WORK_DURATION")
-                .help("Sets the duration of a work session in minutes")
+                .help("Sets the duration of a work session.")
                 .default_value("00:25:00"),
         )
         .arg(
@@ -24,7 +23,7 @@ async fn main() {
                 .short('b')
                 .long("break")
                 .value_name("BREAK_DURATION")
-                .help("Sets the duration of a short break in minutes")
+                .help("Sets the duration of a short break.")
                 .default_value("00:05:00"),
         )
         .get_matches();
@@ -37,24 +36,24 @@ async fn main() {
     let break_duration = NaiveTime::parse_from_str(break_duration, "%H:%M:%S")
         .expect("Unable to parse the `break` argument.");
 
+    println!("Press Enter to start the pomodoro or the break session.\n");
     loop {
-        println!("Start work session!");
-        start_timer(work_duration).await;
-        println!("Take a break!");
-        start_timer(break_duration).await;
+        println!("Pomodoro: {}", work_duration);
+        println!("------------------");
+        start_timer(work_duration);
+        println!("Break: {}", break_duration);
+        println!("---------------");
+        start_timer(break_duration);
     }
 }
 
-async fn start_timer(target_time: NaiveTime) {
-    println!("Target time: {}", target_time);
-
-    println!("Press Enter to continue...");
+fn start_timer(target_time: NaiveTime) {
     let mut buffer = String::new();
     io::stdin()
         .read_line(&mut buffer)
-        .expect("Error reading from stdin.");
+        .expect("Unable to read from stdin.");
 
-    count_down(target_time).await;
+    count_down(target_time);
 
     Notification::new()
         .summary("Timer is finished.")
@@ -63,17 +62,14 @@ async fn start_timer(target_time: NaiveTime) {
         .expect("Error during sending the notification.");
 }
 
-async fn count_down(mut target_time: NaiveTime) {
+fn count_down(mut target_time: NaiveTime) {
     let zero = NaiveTime::from_hms_opt(0, 0, 0).unwrap();
     while target_time > zero {
         target_time -= Duration::seconds(1);
-        sleep(std::time::Duration::from_secs(1)).await;
-        
-        print!("\rStart time elapsed: {}", target_time);
-        io::stdout()
-            .flush()
-            .expect("Error flushing the output stream.");
+        sleep(std::time::Duration::from_secs(1));
 
+        print!("{}\r", target_time);
+        io::stdout().flush().expect("Unable to flush stdout.");
     }
-    println!();
+    print!("");
 }
